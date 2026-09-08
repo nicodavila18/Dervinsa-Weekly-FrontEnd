@@ -5,64 +5,51 @@ import { crearView } from './views/crear.js';
 
 // 1. CREAMOS LAS VISTAS "FALSAS" (Hasta que armemos las reales)
 const vistas = {
-  dashboard: `
-    <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Ejecutivo</h2>
-    <p class="text-gray-600">Acá va a ir el resumen de las gerencias.</p>
-  `,
-  novedades: `
-    <h2 class="text-3xl font-bold text-gray-800 mb-2">Todas las Novedades</h2>
-    <p class="text-gray-600">Acá va a ir la tabla grande con los filtros.</p>
-  `,
-  weekly: `
-    <h2 class="text-3xl font-bold text-gray-800 mb-2">Reunión Weekly</h2>
-    <p class="text-gray-600">Pantalla para gestionar la reunión semanal.</p>
-  `,
-  crear: crearView(),
-  gerencial: `
-    <h2 class="text-3xl font-bold text-gray-800 mb-2">Vista Gerencial</h2>
-    <p class="text-gray-600">Panel de administración general.</p>
-  `
+  dashboard: `<h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Ejecutivo</h2>`,
+  novedades: `<h2 class="text-3xl font-bold text-gray-800 mb-2">Todas las Novedades</h2>`,
+  weekly: `<h2 class="text-3xl font-bold text-gray-800 mb-2">Reunión Weekly</h2>`,
+  gerencial: `<h2 class="text-3xl font-bold text-gray-800 mb-2">Vista Gerencial</h2>`
 };
 
 const app = document.querySelector('#app');
 
 // 2. FUNCIÓN PARA DIBUJAR LA PANTALLA
 function renderApp() {
-  // 1. VALIDACIÓN DE SESIÓN (El Patovica)
-  // Si no hay usuario logueado, dibujamos la pantalla de login y frenamos acá.
+  
   if (!usuarioActual) {
     app.innerHTML = loginView();
     
-    // Capturamos el formulario después de dibujarlo
     const form = document.getElementById('login-form');
-    
     form.addEventListener('submit', (e) => {
-      e.preventDefault(); // Evitamos que la página se recargue sola
-      
+      e.preventDefault();
       const email = document.getElementById('email-input').value.toLowerCase();
       const errorMsg = document.getElementById('login-error');
       
-      // Buscamos si el mail escrito coincide con alguno de nuestra 'base de datos'
       const usuarioEncontrado = Object.values(usuariosPrueba).find(u => u.email === email);
       
       if (usuarioEncontrado) {
-        // Logueo exitoso
-        setUsuarioActual(usuarioEncontrado); // Guardamos quién entró
-        window.location.hash = '#/dashboard'; // Lo mandamos al dashboard
-        renderApp(); // Volvemos a dibujar toda la app (ahora pasará al paso 2)
+        setUsuarioActual(usuarioEncontrado);
+        window.location.hash = '#/dashboard';
+        renderApp();
       } else {
-        // Logueo fallido: Mostramos el mensaje rojo
         errorMsg.classList.remove('hidden');
       }
     });
-    
-    return; // Usamos 'return' para cortar la función y que NO dibuje el dashboard
+    return;
   }
 
-  // 2. RENDERIZADO DE LA APP PRIVADA
-  // Si llegamos a esta línea, es porque el usuario SÍ pasó la validación.
   const hash = window.location.hash.slice(2) || 'dashboard';
-  const contenidoVista = vistas[hash] || vistas.dashboard;
+  
+  // 2. ACÁ ESTÁ EL TRUCO: GENERAMOS LA VISTA EN EL MOMENTO EXACTO
+  let contenidoVista;
+  if (hash === 'crear') {
+    // Si la URL dice "crear", recién AHORA ejecutamos la función, 
+    // cuando ya sabemos seguro quién está logueado.
+    contenidoVista = crearView(); 
+  } else {
+    // Si es otra vista, usamos los textos de prueba
+    contenidoVista = vistas[hash] || vistas.dashboard;
+  }
 
   app.innerHTML = `
     <div class="flex min-h-screen bg-[#f4f6f4]">
