@@ -1,4 +1,6 @@
 import { sidebar } from './components/sidebar.js';
+import { loginView } from './views/login.js'; // Importamos la nueva pantalla
+import { usuarioActual, usuariosPrueba, setUsuarioActual } from './data.js';
 
 // 1. CREAMOS LAS VISTAS "FALSAS" (Hasta que armemos las reales)
 const vistas = {
@@ -28,25 +30,50 @@ const app = document.querySelector('#app');
 
 // 2. FUNCIÓN PARA DIBUJAR LA PANTALLA
 function renderApp() {
-  // Leemos qué dice la URL (ej: "#/novedades"). Si está vacía, por defecto es "dashboard".
+  // 1. VALIDACIÓN DE SESIÓN (El Patovica)
+  // Si no hay usuario logueado, dibujamos la pantalla de login y frenamos acá.
+  if (!usuarioActual) {
+    app.innerHTML = loginView();
+    
+    // Capturamos el formulario después de dibujarlo
+    const form = document.getElementById('login-form');
+    
+    form.addEventListener('submit', (e) => {
+      e.preventDefault(); // Evitamos que la página se recargue sola
+      
+      const email = document.getElementById('email-input').value.toLowerCase();
+      const errorMsg = document.getElementById('login-error');
+      
+      // Buscamos si el mail escrito coincide con alguno de nuestra 'base de datos'
+      const usuarioEncontrado = Object.values(usuariosPrueba).find(u => u.email === email);
+      
+      if (usuarioEncontrado) {
+        // Logueo exitoso
+        setUsuarioActual(usuarioEncontrado); // Guardamos quién entró
+        window.location.hash = '#/dashboard'; // Lo mandamos al dashboard
+        renderApp(); // Volvemos a dibujar toda la app (ahora pasará al paso 2)
+      } else {
+        // Logueo fallido: Mostramos el mensaje rojo
+        errorMsg.classList.remove('hidden');
+      }
+    });
+    
+    return; // Usamos 'return' para cortar la función y que NO dibuje el dashboard
+  }
+
+  // 2. RENDERIZADO DE LA APP PRIVADA
+  // Si llegamos a esta línea, es porque el usuario SÍ pasó la validación.
   const hash = window.location.hash.slice(2) || 'dashboard';
-  
-  // Buscamos el HTML de esa vista. Si escriben cualquier cosa, mostramos el dashboard.
   const contenidoVista = vistas[hash] || vistas.dashboard;
 
   app.innerHTML = `
     <div class="flex min-h-screen bg-[#f4f6f4]">
-      
-      <!-- Inyectamos el sidebar y le avisamos en qué ruta estamos para que pinte el botón -->
-      ${sidebar(hash)}
-
+      ${sidebar(hash, usuarioActual)}
       <main class="flex-1 p-8 md:ml-[250px]">
         <div class="max-w-[1580px] mx-auto">
-          <!-- Inyectamos el contenido de la pantalla seleccionada -->
           ${contenidoVista}
         </div>
       </main>
-
     </div>
   `;
 }
@@ -54,6 +81,18 @@ function renderApp() {
 // 3. ESCUCHAMOS LOS CAMBIOS EN LA URL
 // Cada vez que el usuario hace clic en un link (cambia el #), volvemos a dibujar la app.
 window.addEventListener('hashchange', renderApp);
+
+// ESCUCHAMOS EL CLIC EN "CERRAR SESIÓN"
+// Usamos el contenedor principal 'app' para escuchar el clic sin importar cuándo se dibuje el botón
+app.addEventListener('click', (e) => {
+  const btnLogout = e.target.closest('#btn-logout'); // Buscamos si el clic fue en el botón o su ícono
+  
+  if (btnLogout) {
+    setUsuarioActual(null); // Vaciamos el usuario
+    window.location.hash = ''; // Limpiamos la ruta
+    renderApp(); // Volvemos a dibujar (nos mandará al login)
+  }
+});
 
 // 4. DIBUJAMOS LA APP POR PRIMERA VEZ AL CARGAR
 renderApp();
