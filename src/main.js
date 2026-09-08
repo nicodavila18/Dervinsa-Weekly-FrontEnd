@@ -1,6 +1,7 @@
 import { sidebar } from './components/sidebar.js';
 import { loginView } from './views/login.js'; // Importamos la nueva pantalla
 import { usuarioActual, usuariosPrueba, setUsuarioActual } from './data.js';
+import { crearView } from './views/crear.js';
 
 // 1. CREAMOS LAS VISTAS "FALSAS" (Hasta que armemos las reales)
 const vistas = {
@@ -16,10 +17,7 @@ const vistas = {
     <h2 class="text-3xl font-bold text-gray-800 mb-2">Reunión Weekly</h2>
     <p class="text-gray-600">Pantalla para gestionar la reunión semanal.</p>
   `,
-  crear: `
-    <h2 class="text-3xl font-bold text-gray-800 mb-2">Nueva Novedad</h2>
-    <p class="text-gray-600">Acá irá el formulario.</p>
-  `,
+  crear: crearView(),
   gerencial: `
     <h2 class="text-3xl font-bold text-gray-800 mb-2">Vista Gerencial</h2>
     <p class="text-gray-600">Panel de administración general.</p>
