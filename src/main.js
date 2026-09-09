@@ -2,6 +2,7 @@ import { sidebar } from './components/sidebar.js';
 import { loginView } from './views/login.js'; // Importamos la nueva pantalla
 import { usuarioActual, usuariosPrueba, setUsuarioActual } from './data.js';
 import { crearView } from './views/crear.js';
+import { novedadesView } from './views/novedades.js';
 
 // 1. CREAMOS LAS VISTAS "FALSAS" (Hasta que armemos las reales)
 const vistas = {
@@ -43,11 +44,10 @@ function renderApp() {
   // 2. ACÁ ESTÁ EL TRUCO: GENERAMOS LA VISTA EN EL MOMENTO EXACTO
   let contenidoVista;
   if (hash === 'crear') {
-    // Si la URL dice "crear", recién AHORA ejecutamos la función, 
-    // cuando ya sabemos seguro quién está logueado.
     contenidoVista = crearView(); 
+  } else if (hash === 'novedades') { // AGREGAR ESTA LÍNEA
+    contenidoVista = novedadesView(); 
   } else {
-    // Si es otra vista, usamos los textos de prueba
     contenidoVista = vistas[hash] || vistas.dashboard;
   }
 

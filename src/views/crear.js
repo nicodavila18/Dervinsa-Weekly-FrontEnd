@@ -248,7 +248,7 @@ export function crearView() {
           <div class="mb-8">
             <div class="text-[#298c71] font-bold text-xs tracking-widest uppercase mb-1">Paso 1 de 3</div>
             <h3 class="text-3xl font-extrabold text-gray-800">Temario semanal: ${usuarioActual?.gerencia}</h3>
-            <p class="text-gray-500 text-base mt-1">Desplegá los puntos que necesites reportar esta semana. Los espacios vacíos no se publicarán.</p>
+            <p class="text-gray-500 text-base mt-1">Desplegá los puntos que necesites reportar esta semana. Los espacios vacíos se publicarán sin novedad.</p>
           </div>
           
           <div id="contenedor-preguntas" class="flex flex-col gap-3 mb-4">
