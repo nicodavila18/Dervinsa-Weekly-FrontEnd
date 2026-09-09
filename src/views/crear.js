@@ -251,7 +251,7 @@ export function crearView() {
             <p class="text-gray-500 text-base mt-1">Desplegá los puntos que necesites reportar esta semana. Los espacios vacíos no se publicarán.</p>
           </div>
           
-          <div class="flex flex-col gap-3 mb-8">
+          <div id="contenedor-preguntas" class="flex flex-col gap-3 mb-4">
             <!-- Renderizamos la lista según la gerencia -->
             ${preguntasGerencia.map(p => `
               <div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm transition-all hover:border-gray-300">
@@ -270,13 +270,13 @@ export function crearView() {
                 </div>
               </div>
             `).join('')}
+          </div> <!-- Fin del contenedor de preguntas -->
 
-            <!-- Botón extra para agregar tema libre -->
-            <button type="button" onclick="agregarTemaLibre()" class="mt-2 flex items-center justify-center gap-2 w-full p-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-[#298c71] hover:text-[#298c71] hover:bg-[#ebf2ee] transition-all font-bold text-sm group">
-              <span class="text-xl leading-none group-hover:scale-110 transition-transform">+</span>
-              Agregar tema personalizado
-            </button>
-          </div>
+          <!-- Botón extra para agregar tema libre (AHORA ESTÁ AFUERA DEL CONTENEDOR) -->
+          <button type="button" onclick="agregarTemaLibre()" class="mb-8 flex items-center justify-center gap-2 w-full p-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-[#298c71] hover:text-[#298c71] hover:bg-[#ebf2ee] transition-all font-bold text-sm group">
+            <span class="text-xl leading-none group-hover:scale-110 transition-transform">+</span>
+            Agregar tema personalizado
+          </button>
 
           <div class="flex justify-between mt-auto pt-6 border-t border-gray-100">
             <button type="button" class="px-6 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">Guardar borrador y salir</button>
