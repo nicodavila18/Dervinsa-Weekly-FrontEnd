@@ -240,7 +240,7 @@ export function crearView() {
       </div>
 
       <!-- ÁREA DEL FORMULARIO -->
-      <form id="form-crear-novedad" class="flex-1 flex flex-col w-full max-w-5xl mx-auto px-10 py-8 min-h-0">
+      <form id="form-crear-novedad" class="flex-1 flex flex-col w-full max-w-[1400px] mx-auto px-10 py-8 min-h-0">
         
         <!-- PASO 1 y PASO 2 (Se mantienen igual) -->
         <!-- PASO 1: ACORDEÓN DINÁMICO -->
