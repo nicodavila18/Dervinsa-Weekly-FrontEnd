@@ -138,6 +138,44 @@ export function crearView() {
       }
     };
 
+    // NUEVA LÓGICA: Agregar Tema Personalizado
+    window.agregarTemaLibre = () => {
+      const contenedor = document.getElementById('contenedor-preguntas');
+      const idTemporal = 'custom_' + Date.now(); 
+
+      document.querySelectorAll('.acordeon-contenido').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.acordeon-icono').forEach(el => el.style.transform = 'rotate(0deg)');
+
+      const htmlNuevoTema = `
+        <div class="border border-dashed border-[#298c71] rounded-xl overflow-hidden bg-white shadow-sm transition-all mb-3">
+          
+          <div class="w-full flex justify-between items-center p-5 bg-[#ebf2ee] hover:bg-[#e0ece5] transition-colors cursor-pointer" 
+               onclick="if(event.target.tagName !== 'INPUT' && !event.target.closest('button')) toggleAcordeon('${idTemporal}')">
+            
+            <div class="flex items-center gap-4 text-left w-full pr-4">
+              <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#298c71] text-white shrink-0 shadow-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </span>
+              <input type="text" placeholder="Escribí el título de tu nuevo tema..." class="font-bold text-[#1a4031] text-[15px] bg-transparent border-b border-[#298c71]/30 focus:border-[#298c71] focus:outline-none w-full placeholder:font-normal placeholder:text-[#7a9387] py-1 transition-colors">
+            </div>
+            
+            <div class="flex items-center gap-3 shrink-0">
+              <button type="button" onclick="this.closest('.border-dashed').remove()" class="text-[#7a9387] hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-white/50" title="Eliminar tema">
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+              </button>
+              <svg id="icono-${idTemporal}" class="acordeon-icono text-[#298c71] transform transition-transform duration-300" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+          
+          <div id="contenido-${idTemporal}" class="acordeon-contenido border-t border-[#298c71]/20 bg-white p-5">
+            <textarea placeholder="Detallá los avances, novedades o problemas sobre este nuevo tema..." class="w-full h-32 p-4 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#298c71] resize-y bg-gray-50 shadow-inner"></textarea>
+          </div>
+        </div>
+      `;
+
+      contenedor.insertAdjacentHTML('beforeend', htmlNuevoTema);
+    };
+
     // 2. Selección única (Para Paso 2 - Tipo y Prioridad)
     window.seleccionarTarjeta = (botonClickeado, nombreGrupo) => {
       document.querySelectorAll('.' + nombreGrupo).forEach(btn => {
@@ -234,7 +272,7 @@ export function crearView() {
             `).join('')}
 
             <!-- Botón extra para agregar tema libre -->
-            <button type="button" class="mt-2 flex items-center justify-center gap-2 w-full p-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-[#298c71] hover:text-[#298c71] hover:bg-[#ebf2ee] transition-all font-bold text-sm group">
+            <button type="button" onclick="agregarTemaLibre()" class="mt-2 flex items-center justify-center gap-2 w-full p-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-[#298c71] hover:text-[#298c71] hover:bg-[#ebf2ee] transition-all font-bold text-sm group">
               <span class="text-xl leading-none group-hover:scale-110 transition-transform">+</span>
               Agregar tema personalizado
             </button>
