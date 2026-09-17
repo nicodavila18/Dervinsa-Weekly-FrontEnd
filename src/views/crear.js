@@ -1,12 +1,17 @@
 import { usuarioActual } from '../data.js';
+import { headerComponent } from '../components/header.js';
 
 /**
- * VISTA: Crear Novedad
- * Paso 3 completado: Sistema de Tags (Choice Chips) de selección múltiple.
+ * VISTA: Crear Novedades (Reporte Semanal)
+ * Formulario dinámico basado en el temario de cada gerencia.
+ * Cumple con RN-09, RN-16, RN-20, RN-22 y RN-23.
  */
 export function crearView() {
 
-  // 1. DICCIONARIO DE PREGUNTAS (Mantiene la numeración oficial)
+  // ============================================================================
+  // 1. DICCIONARIO DE PREGUNTAS (Base de datos local temporal)
+  // ============================================================================
+  // Mantenemos tu base de datos de preguntas intacta. (Oculto algunas por brevedad visual aquí, pero mantené tu lista completa)
   const bancoDePreguntas = {
     'SSHEQ': [
       { id: 1, texto: 'Incidentes de seguridad personal y patrimonial' },
@@ -103,287 +108,304 @@ export function crearView() {
     ]
   };
 
-  // Buscamos las preguntas del usuario logueado (Si no existe, mostramos un array vacío)
+  // Por si el usuario actual no tiene gerencia asignada en los mocks, le damos un fallback
   const preguntasGerencia = bancoDePreguntas[usuarioActual?.gerencia] || [];
-  
-  // Lista de gerencias para dibujar los botones automáticamente
-  const gerencias = [
-    'SSHEQ', 'Comercio Exterior', 'Comercio Local', 
-    'Administración', 'IT', 'Producción', 
-    'RRHH', 'Depósito', 'Mantenimiento'
-  ];
 
+  // ============================================================================
+  // 2. LÓGICA DE INTERFAZ (Ejecutada tras el renderizado)
+  // ============================================================================
   setTimeout(() => {
-    // Navegación de pasos (Wizard)
-    window.cambiarPaso = (paso) => {
-      document.querySelectorAll('.wizard-step').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`paso-${paso}`).classList.remove('hidden');
-      window.scrollTo(0, 0); // Sube la pantalla al cambiar de paso
-    };
-
-    // Lógica del Acordeón (Solo uno abierto a la vez)
+    
+    // BACKEND INFO: Abrir acordeón y cerrar los demás
     window.toggleAcordeon = (id) => {
-      const contenidoActual = document.getElementById(`contenido-${id}`);
-      const iconoActual = document.getElementById(`icono-${id}`);
-      const estaAbierto = !contenidoActual.classList.contains('hidden');
+      const contenido = document.getElementById(`contenido-${id}`);
+      const icono = document.getElementById(`icono-${id}`);
+      const estaAbierto = !contenido.classList.contains('hidden');
 
-      // 1. Cerramos absolutamente todos los acordeones
       document.querySelectorAll('.acordeon-contenido').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.acordeon-icono').forEach(el => el.style.transform = 'rotate(0deg)');
 
-      // 2. Si el que clickeamos NO estaba abierto, lo abrimos
       if (!estaAbierto) {
-        contenidoActual.classList.remove('hidden');
-        iconoActual.style.transform = 'rotate(180deg)';
+        contenido.classList.remove('hidden');
+        icono.style.transform = 'rotate(180deg)';
       }
     };
 
-    // NUEVA LÓGICA: Agregar Tema Personalizado
-    window.agregarTemaLibre = () => {
-      const contenedor = document.getElementById('contenedor-preguntas');
-      const idTemporal = 'custom_' + Date.now(); 
+    // BACKEND INFO (RN-16): Selector de prioridad
+    window.seleccionarPrioridad = (btn, idPregunta, valor) => {
+      const botones = document.querySelectorAll(`.prioridad-btn-${idPregunta}`);
+      botones.forEach(b => {
+        b.classList.remove('border-[#298c71]', 'bg-[#ebf2ee]', 'text-[#1a4031]');
+        b.classList.add('border-gray-200', 'bg-white', 'text-gray-600');
+      });
+      btn.classList.remove('border-gray-200', 'bg-white', 'text-gray-600');
+      btn.classList.add('border-[#298c71]', 'bg-[#ebf2ee]', 'text-[#1a4031]');
+    };
 
-      document.querySelectorAll('.acordeon-contenido').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.acordeon-icono').forEach(el => el.style.transform = 'rotate(0deg)');
+    // BACKEND INFO (RN-09): Selector de tipo y lógica de visualización de colaboración
+    window.seleccionarTipo = (btn, idPregunta, valor) => {
+      const botones = document.querySelectorAll(`.tipo-btn-${idPregunta}`);
+      botones.forEach(b => {
+        b.classList.remove('border-[#298c71]', 'bg-[#ebf2ee]', 'text-[#1a4031]');
+        b.classList.add('border-gray-200', 'bg-white', 'text-gray-600');
+      });
+      btn.classList.remove('border-gray-200', 'bg-white', 'text-gray-600');
+      btn.classList.add('border-[#298c71]', 'bg-[#ebf2ee]', 'text-[#1a4031]');
+      
+      // Lógica de UI: Mostrar/Ocultar bloque de colaboración según el tipo
+      const bloqueColaboracion = document.getElementById(`bloque-colaboracion-${idPregunta}`);
+      if (bloqueColaboracion) {
+        if (valor === 'Seguimiento') {
+          bloqueColaboracion.classList.remove('hidden');
+        } else {
+          bloqueColaboracion.classList.add('hidden');
+        }
+      }
+    };
 
-      const htmlNuevoTema = `
-        <div class="border border-dashed border-[#298c71] rounded-xl overflow-hidden bg-white shadow-sm transition-all mb-3">
-          
-          <div class="w-full flex justify-between items-center p-5 bg-[#ebf2ee] hover:bg-[#e0ece5] transition-colors cursor-pointer" 
-               onclick="if(event.target.tagName !== 'INPUT' && !event.target.closest('button')) toggleAcordeon('${idTemporal}')">
-            
-            <div class="flex items-center gap-4 text-left w-full pr-4">
-              <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#298c71] text-white shrink-0 shadow-sm">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              </span>
-              <input type="text" placeholder="Escribí el título de tu nuevo tema..." class="font-bold text-[#1a4031] text-[15px] bg-transparent border-b border-[#298c71]/30 focus:border-[#298c71] focus:outline-none w-full placeholder:font-normal placeholder:text-[#7a9387] py-1 transition-colors">
-            </div>
-            
-            <div class="flex items-center gap-3 shrink-0">
-              <button type="button" onclick="this.closest('.border-dashed').remove()" class="text-[#7a9387] hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-white/50" title="Eliminar tema">
-                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-              </button>
-              <svg id="icono-${idTemporal}" class="acordeon-icono text-[#298c71] transform transition-transform duration-300" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </div>
+    // Lógica UI: Mostrar los campos extra si tilda "Requerir colaboración"
+    window.toggleCamposColaboracion = (checkbox, idPregunta) => {
+      const campos = document.getElementById(`campos-colaboracion-${idPregunta}`);
+      if (checkbox.checked) {
+        campos.classList.remove('hidden');
+        campos.classList.add('flex');
+      } else {
+        campos.classList.add('hidden');
+        campos.classList.remove('flex');
+      }
+    };
+
+    // BACKEND INFO (RN-23): Agregar múltiples áreas de colaboración
+    window.agregarColaboracion = (idPregunta) => {
+      const contenedor = document.getElementById(`lista-colaboraciones-${idPregunta}`);
+      const rowHtml = `
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 relative items-end">
+          <div class="xl:col-span-1">
+            <label class="block text-[9px] font-extrabold text-amber-700/70 uppercase tracking-widest mb-1.5">Gerencia Requerida</label>
+            <select class="w-full px-3 py-2 rounded-md border border-amber-200 text-sm focus:outline-none focus:border-amber-500 bg-white text-gray-800 font-medium">
+              <option value="" disabled selected>Seleccionar gerencia...</option>
+              <option>Mantenimiento</option>
+              <option>Producción</option>
+              <option>Comercio Local</option>
+              <option>Administración / Finanzas</option>
+              <option>Sistemas</option>
+            </select>
           </div>
-          
-          <div id="contenido-${idTemporal}" class="acordeon-contenido border-t border-[#298c71]/20 bg-white p-5">
-            <textarea placeholder="Detallá los avances, novedades o problemas sobre este nuevo tema..." class="w-full h-32 p-4 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#298c71] resize-y bg-gray-50 shadow-inner"></textarea>
+          <div class="xl:col-span-2 flex gap-2">
+            <div class="flex-1">
+              <label class="block text-[9px] font-extrabold text-amber-700/70 uppercase tracking-widest mb-1.5">Necesidad concreta</label>
+              <input type="text" placeholder="Ej: Confirmar fecha de disponibilidad de materia prima" class="w-full px-3 py-2 rounded-md border border-amber-200 text-sm focus:outline-none focus:border-amber-500 bg-white text-gray-800">
+            </div>
+            <!-- Botón para quitar esta fila extra -->
+            <button type="button" onclick="this.closest('.grid').remove()" class="p-2 text-amber-500 hover:text-red-500 hover:bg-red-50 rounded transition-colors mb-[1px]" title="Quitar área">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
           </div>
         </div>
       `;
-
-      contenedor.insertAdjacentHTML('beforeend', htmlNuevoTema);
+      contenedor.insertAdjacentHTML('beforeend', rowHtml);
     };
 
-    // 2. Selección única (Para Paso 2 - Tipo y Prioridad)
-    window.seleccionarTarjeta = (botonClickeado, nombreGrupo) => {
-      document.querySelectorAll('.' + nombreGrupo).forEach(btn => {
-        btn.classList.remove('border-[#298c71]', 'bg-[#ebf2ee]');
-        btn.classList.add('border-gray-200', 'bg-white');
-        const texto = btn.querySelector('.texto-tarjeta');
-        if (texto) {
-          texto.classList.remove('text-[#1a4031]');
-          texto.classList.add('text-gray-700');
-        }
+    window.agregarTemaLibre = () => {
+      const contenedor = document.getElementById('contenedor-preguntas');
+      const idTemporal = 'custom_' + Date.now(); 
+      contenedor.insertAdjacentHTML('beforeend', generarAcordeonHTML({ id: idTemporal, texto: '' }, true));
+    };
+
+    const formCrear = document.getElementById('form-crear-novedades');
+    if (formCrear) {
+      formCrear.addEventListener('submit', (e) => {
+        e.preventDefault(); 
+        import('../components/toast.js').then(module => {
+           module.emitirNotificacion('Novedades publicadas', 'Tu reporte semanal se ha guardado correctamente.', '#/novedades', 'exito');
+           setTimeout(() => {
+              module.emitirNotificacion('Mención enviada', 'Notificamos a las áreas arrobadas en tu reporte.', '#/detalle', 'info');
+           }, 800); 
+           setTimeout(() => {
+              window.location.hash = '#/dashboard';
+           }, 2500);
+        });
       });
-      botonClickeado.classList.remove('border-gray-200', 'bg-white');
-      botonClickeado.classList.add('border-[#298c71]', 'bg-[#ebf2ee]');
-      const textoActivo = botonClickeado.querySelector('.texto-tarjeta');
-      if (textoActivo) {
-        textoActivo.classList.remove('text-gray-700');
-        textoActivo.classList.add('text-[#1a4031]');
-      }
-    };
-
-    // 3. Selección Múltiple (Para Paso 3 - Tags de Gerencias)
-    window.toggleTag = (btn) => {
-      const estaActivo = btn.classList.contains('border-[#298c71]');
-      const icono = btn.querySelector('.tag-icon');
-
-      if (estaActivo) {
-        // Si estaba seleccionado, lo apagamos
-        btn.classList.remove('border-[#298c71]', 'bg-[#ebf2ee]', 'text-[#1a4031]');
-        btn.classList.add('border-gray-200', 'bg-white', 'text-gray-600');
-        icono.innerHTML = '+'; // Volvemos al más
-      } else {
-        // Si estaba apagado, lo encendemos
-        btn.classList.remove('border-gray-200', 'bg-white', 'text-gray-600');
-        btn.classList.add('border-[#298c71]', 'bg-[#ebf2ee]', 'text-[#1a4031]');
-        // Usamos el check (✓)
-        icono.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-      }
-    };
-
+    }
   }, 100);
 
-  return `
-    <div class="bg-white min-h-screen -m-8 flex flex-col relative overflow-hidden">
+  // ============================================================================
+  // GENERADOR HTML DE ACORDEONES (Mantiene código DRY)
+  // ============================================================================
+  const generarAcordeonHTML = (p, esLibre = false) => `
+    <div class="border ${esLibre ? 'border-dashed border-[#298c71]' : 'border-gray-200'} rounded-lg overflow-hidden bg-white shadow-sm transition-all mb-3">
       
-      <!-- BARRA SUPERIOR -->
-      <div class="bg-white border-b border-gray-200 px-10 py-5 flex justify-between items-center shrink-0">
-        <div class="flex items-center gap-2 text-sm text-gray-500">
-          <span class="hover:text-[#1a4031] cursor-pointer transition-colors font-medium">Dervinsa</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-          <span class="font-bold text-gray-800">Crear novedad</span>
-        </div>
-        
-        <div class="flex items-center gap-4">
-          <span class="text-xs font-medium text-gray-400 flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Borrador guardado 10:42
+      <!-- BOTÓN HEADER -->
+      <button type="button" onclick="if(event.target.tagName !== 'INPUT' && !event.target.closest('.btn-delete')) toggleAcordeon('${p.id}')" class="w-full flex justify-between items-center p-4 ${esLibre ? 'bg-[#ebf2ee] hover:bg-[#e0ece5]' : 'bg-white hover:bg-gray-50'} transition-colors cursor-pointer">
+        <div class="flex items-center gap-3 text-left w-full pr-4">
+          <span class="flex items-center justify-center w-7 h-7 rounded ${esLibre ? 'bg-[#298c71] text-white' : 'bg-[#ebf2ee] text-[#1a4031]'} font-bold text-sm shrink-0 shadow-sm">
+            ${esLibre ? '+' : p.id}
           </span>
-          <button class="p-2 bg-gray-50 rounded-full border border-gray-200 text-gray-500 hover:text-[#1a4031] transition-colors shadow-sm">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          </button>
+          ${esLibre 
+            ? `<input type="text" placeholder="Título del nuevo tema..." class="font-bold text-[#1a4031] text-sm bg-transparent border-b border-[#298c71]/30 focus:border-[#298c71] focus:outline-none w-full placeholder:font-normal placeholder:text-[#7a9387] py-1 transition-colors">` 
+            : `<span class="font-bold text-gray-700 text-sm">${p.texto}</span>`
+          }
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          ${esLibre ? `
+            <div class="btn-delete text-[#7a9387] hover:text-red-500 transition-colors p-1 rounded hover:bg-white/50" title="Eliminar tema" onclick="this.closest('.border-dashed').remove()">
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+            </div>
+          ` : ''}
+          <svg id="icono-${p.id}" class="acordeon-icono ${esLibre ? 'text-[#298c71]' : 'text-gray-400'} transform transition-transform duration-300" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </button>
+      
+      <!-- CONTENIDO -->
+      <div id="contenido-${p.id}" class="acordeon-contenido hidden border-t ${esLibre ? 'border-[#298c71]/20' : 'border-gray-100'} bg-[#fbfcfb] flex flex-col">
+        
+        <div class="p-5 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+              <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Título de la novedad (Breve)</label>
+              <input type="text" placeholder="Ej: Demora en mantenimiento bomba P-204" class="w-full px-3 py-2.5 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#298c71] bg-white shadow-inner font-bold text-gray-800">
+            </div>
+            <div class="md:col-span-1">
+              <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Responsable</label>
+              <select class="w-full px-3 py-2.5 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#298c71] bg-white text-gray-800 font-medium">
+                <option value="yo" selected>Yo (${usuarioActual?.nombre})</option>
+                <option value="otro">Delegar a miembro del equipo...</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Detalle y desarrollo</label>
+            <textarea placeholder="Desarrollá los avances, el contexto o el problema aquí..." class="w-full h-24 p-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#298c71] resize-y bg-white shadow-inner"></textarea>
+          </div>
+
+          <!-- BLOQUE DINÁMICO DE COLABORACIÓN -->
+          <div id="bloque-colaboracion-${p.id}" class="mt-2 p-4 bg-[#fffcf5] border border-amber-200/70 rounded-lg">
+            
+            <label class="flex items-center gap-2 cursor-pointer mb-1 w-fit group">
+              <input type="checkbox" onchange="toggleCamposColaboracion(this, '${p.id}')" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-600 cursor-pointer">
+              <span class="text-xs font-bold text-amber-800 group-hover:text-amber-600 transition-colors select-none">Requerir colaboración formal de otra área</span>
+            </label>
+            
+            <!-- CONTENEDOR MULTI-FILA -->
+            <div id="campos-colaboracion-${p.id}" class="hidden flex-col gap-3 mt-4 pt-4 border-t border-amber-200/50">
+              
+              <!-- Lista de colaboraciones (Acá se inyectan las nuevas) -->
+              <div id="lista-colaboraciones-${p.id}" class="space-y-4">
+                
+                <!-- Fila Base (No se borra) -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 relative">
+                  <div class="xl:col-span-1">
+                    <label class="block text-[9px] font-extrabold text-amber-700/70 uppercase tracking-widest mb-1.5">Gerencia Requerida</label>
+                    <select class="w-full px-3 py-2 rounded-md border border-amber-200 text-sm focus:outline-none focus:border-amber-500 bg-white text-gray-800 font-medium">
+                      <option value="" disabled selected>Seleccionar gerencia...</option>
+                      <option>Mantenimiento</option>
+                      <option>Producción</option>
+                      <option>Comercio Local</option>
+                      <option>Administración / Finanzas</option>
+                      <option>Sistemas</option>
+                    </select>
+                  </div>
+                  <div class="xl:col-span-2">
+                    <label class="block text-[9px] font-extrabold text-amber-700/70 uppercase tracking-widest mb-1.5">Necesidad concreta</label>
+                    <input type="text" placeholder="Ej: Confirmar fecha de disponibilidad de materia prima" class="w-full px-3 py-2 rounded-md border border-amber-200 text-sm focus:outline-none focus:border-amber-500 bg-white text-gray-800">
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Botón Sumar Gerencia -->
+              <button type="button" onclick="agregarColaboracion('${p.id}')" class="text-[10px] font-extrabold text-amber-600 hover:text-amber-800 transition-colors flex items-center gap-1 w-fit mt-1 uppercase tracking-widest">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Sumar otra gerencia
+              </button>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="bg-gray-50 border-t border-gray-200 p-4 flex flex-wrap items-center justify-between gap-4">
+          
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mr-1">Tipo:</span>
+            <button type="button" onclick="seleccionarTipo(this, '${p.id}', 'Seguimiento')" class="tipo-btn-${p.id} px-3 py-1.5 rounded border border-[#298c71] bg-[#ebf2ee] text-[#1a4031] text-xs font-bold transition-colors">Seguimiento</button>
+            <button type="button" onclick="seleccionarTipo(this, '${p.id}', 'Aviso')" class="tipo-btn-${p.id} px-3 py-1.5 rounded border border-gray-200 bg-white text-gray-600 hover:border-gray-400 text-xs font-bold transition-colors">Aviso</button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mr-1">Prioridad:</span>
+            <button type="button" onclick="seleccionarPrioridad(this, '${p.id}', 'Baja')" class="prioridad-btn-${p.id} px-3 py-1.5 rounded border border-[#298c71] bg-[#ebf2ee] text-[#1a4031] text-xs font-bold transition-colors">Baja</button>
+            <button type="button" onclick="seleccionarPrioridad(this, '${p.id}', 'Media')" class="prioridad-btn-${p.id} px-3 py-1.5 rounded border border-gray-200 bg-white text-gray-600 hover:border-blue-300 text-xs font-bold transition-colors">Media</button>
+            <button type="button" onclick="seleccionarPrioridad(this, '${p.id}', 'Alta')" class="prioridad-btn-${p.id} px-3 py-1.5 rounded border border-gray-200 bg-white text-gray-600 hover:border-orange-300 text-xs font-bold transition-colors">Alta</button>
+            <button type="button" onclick="seleccionarPrioridad(this, '${p.id}', 'Máxima')" class="prioridad-btn-${p.id} px-3 py-1.5 rounded border border-gray-200 bg-white text-gray-600 hover:border-red-300 text-xs font-bold transition-colors">Máxima</button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mr-1">Límite (Opcional):</span>
+            <input type="date" class="px-2 py-1 rounded border border-gray-300 text-xs text-gray-700 focus:outline-none focus:border-[#298c71] bg-white">
+          </div>
+
         </div>
       </div>
+    </div>
+  `;
 
-      <!-- ÁREA DEL FORMULARIO -->
-      <form id="form-crear-novedad" class="flex-1 flex flex-col w-full max-w-[1400px] mx-auto px-10 py-8 min-h-0">
+  // ============================================================================
+  // 3. RENDERIZADO HTML PRINCIPAL
+  // ============================================================================
+  return `
+    <div class="bg-[#fbfcfb] min-h-full flex flex-col relative w-full">
+      ${headerComponent('Crear novedad', [{ texto: 'Dervinsa', url: '#/dashboard' }])}
+
+      <form id="form-crear-novedades" class="flex-1 flex flex-col w-full max-w-[2560px] mx-auto px-8 lg:px-12 2xl:px-24 py-8">
         
-        <!-- PASO 1: ACORDEÓN DINÁMICO -->
-        <div id="paso-1" class="wizard-step flex-1 flex flex-col">
-          <div class="mb-8">
-            <div class="text-[#298c71] font-bold text-xs tracking-widest uppercase mb-1">Paso 1 de 3</div>
-            <h3 class="text-3xl font-extrabold text-gray-800">Temario semanal: ${usuarioActual?.gerencia}</h3>
-            <p class="text-gray-500 text-base mt-1">Desplegá los puntos que necesites reportar esta semana. Los espacios vacíos se publicarán sin novedad.</p>
-          </div>
+        <div class="mb-8">
+          <div class="text-[#298c71] font-bold text-xs tracking-widest uppercase mb-1">REPORTE SEMANAL</div>
+          <h3 class="text-4xl font-extrabold text-[#0a2319]">Temario: ${usuarioActual?.gerencia || ''}</h3>
+          <p class="text-gray-500 text-sm mt-1">Desplegá los puntos que necesites reportar. Los espacios vacíos serán ignorados al publicar.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
           
-          <div id="contenedor-preguntas" class="flex flex-col gap-3 mb-4">
-            <!-- Renderizamos la lista según la gerencia -->
-            ${preguntasGerencia.map(p => `
-              <div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm transition-all hover:border-gray-300">
-                <button type="button" onclick="toggleAcordeon(${p.id})" class="w-full flex justify-between items-center p-5 bg-white hover:bg-gray-50 transition-colors">
-                  <div class="flex items-center gap-4 text-left">
-                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#ebf2ee] text-[#1a4031] font-bold text-sm shrink-0">
-                      ${p.id}
-                    </span>
-                    <span class="font-bold text-gray-700 text-[15px]">${p.texto}</span>
-                  </div>
-                  <svg id="icono-${p.id}" class="acordeon-icono text-gray-400 shrink-0 transform transition-transform duration-300" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                </button>
-                
-                <div id="contenido-${p.id}" class="acordeon-contenido hidden border-t border-gray-100 bg-[#fbfcfb] p-5">
-                  <textarea placeholder="Escribí los avances, novedades o problemas sobre este tema..." class="w-full h-32 p-4 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#298c71] resize-y bg-white shadow-inner"></textarea>
-                </div>
-              </div>
-            `).join('')}
-          </div> <!-- Fin del contenedor de preguntas -->
+          <div class="xl:col-span-3 flex flex-col">
+            
+            <div id="contenedor-preguntas">
+              ${preguntasGerencia.map(p => generarAcordeonHTML(p)).join('')}
+            </div>
 
-          <!-- Botón extra para agregar tema libre (AHORA ESTÁ AFUERA DEL CONTENEDOR) -->
-          <button type="button" onclick="agregarTemaLibre()" class="mb-8 flex items-center justify-center gap-2 w-full p-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-[#298c71] hover:text-[#298c71] hover:bg-[#ebf2ee] transition-all font-bold text-sm group">
-            <span class="text-xl leading-none group-hover:scale-110 transition-transform">+</span>
-            Agregar tema personalizado
+            <button type="button" onclick="window.agregarTemaLibre()" class="mt-2 flex items-center justify-center gap-2 w-full py-3 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 hover:border-[#298c71] hover:text-[#298c71] hover:bg-[#ebf2ee] transition-all font-bold text-sm">
+              <span class="text-lg leading-none">+</span> Agregar tema personalizado
+            </button>
+
+          </div> 
+
+          <!-- COLUMNA DERECHA: MACHETE INFORMATIVO -->
+          <div class="xl:col-span-1 sticky top-20">
+            <div class="bg-white border-t-4 border-t-[#298c71] border-x border-b border-gray-200 rounded-lg p-5 shadow-sm">
+              <h3 class="text-xs font-extrabold text-[#0a2319] mb-2 uppercase tracking-wide flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                Sobre la Colaboración
+              </h3>
+              <p class="text-[11px] text-gray-600 mb-4 leading-relaxed font-medium">
+                Si una novedad requiere acción o respuesta formal de otra área, activá la casilla <strong>"Requerir colaboración"</strong>. El sistema enviará la notificación y generará una alerta de estado <em>Pendiente de colaboración</em> para cada gerencia requerida.
+              </p>
+            </div>
+          </div>
+
+        </div> 
+
+        <!-- BOTONERA FINAL -->
+        <div class="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center">
+          <button type="button" onclick="window.location.hash='#/dashboard'" class="px-6 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:text-[#1a4031] hover:bg-gray-100 transition-colors border border-transparent flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Guardar borrador y salir
           </button>
 
-          <div class="flex justify-between mt-auto pt-6 border-t border-gray-100">
-            <button type="button" class="px-6 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">Guardar borrador y salir</button>
-            <button type="button" onclick="cambiarPaso(2)" class="px-10 py-3 rounded-lg text-sm font-bold text-white bg-[#1a4031] hover:bg-[#122e23] transition-colors shadow-lg active:scale-95">Siguiente paso</button>
-          </div>
-        </div>
-
-        <!-- PASO 2 -->
-        <div id="paso-2" class="wizard-step hidden flex-1 flex flex-col min-h-0">
-          <div class="mb-6 shrink-0">
-            <div class="text-[#298c71] font-bold text-xs tracking-widest uppercase mb-1">Paso 2 de 3</div>
-            <h3 class="text-3xl font-extrabold text-gray-800">Clasificación</h3>
-            <p class="text-gray-500 text-base mt-1">Ayudá a identificar cómo debe tratarse.</p>
-          </div>
-          <div class="flex-1 flex flex-col min-h-0">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-              <div class="flex flex-col gap-8">
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-3">Tipo <span class="text-red-500">*</span></label>
-                  <div class="grid grid-cols-2 gap-3">
-                    <button type="button" onclick="seleccionarTarjeta(this, 'grupo-tipo')" class="grupo-tipo text-left p-4 rounded-xl border-2 border-[#298c71] bg-[#ebf2ee] transition-all">
-                      <div class="texto-tarjeta font-bold text-[#1a4031] text-sm">Aviso</div>
-                      <div class="text-[11px] text-[#298c71] mt-0.5 leading-tight">Información para compartir</div>
-                    </button>
-                    <button type="button" onclick="seleccionarTarjeta(this, 'grupo-tipo')" class="grupo-tipo text-left p-4 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all">
-                      <div class="texto-tarjeta font-bold text-gray-700 text-sm">Tema con seguimiento</div>
-                      <div class="text-[11px] text-gray-500 mt-0.5 leading-tight">Requiere avances o resolución</div>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <div class="flex justify-between items-end mb-2">
-                    <label class="block text-sm font-semibold text-gray-700">Fecha límite</label>
-                    <span class="text-xs text-gray-400">Opcional</span>
-                  </div>
-                  <input type="date" class="w-full px-4 py-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#298c71] transition-all bg-gray-50 hover:bg-white focus:bg-white shadow-inner">
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Prioridad <span class="text-red-500">*</span></label>
-                <div class="grid grid-cols-2 gap-3">
-                  <button type="button" onclick="seleccionarTarjeta(this, 'grupo-prioridad')" class="grupo-prioridad flex items-center gap-3 text-left p-3.5 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all">
-                    <div class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></div><div class="texto-tarjeta font-semibold text-gray-700 text-sm">Máxima</div>
-                  </button>
-                  <button type="button" onclick="seleccionarTarjeta(this, 'grupo-prioridad')" class="grupo-prioridad flex items-center gap-3 text-left p-3.5 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all">
-                    <div class="w-2.5 h-2.5 rounded-full bg-orange-400 shrink-0"></div><div class="texto-tarjeta font-semibold text-gray-700 text-sm">Alta</div>
-                  </button>
-                  <button type="button" onclick="seleccionarTarjeta(this, 'grupo-prioridad')" class="grupo-prioridad flex items-center gap-3 text-left p-3.5 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all">
-                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0"></div><div class="texto-tarjeta font-semibold text-gray-700 text-sm">Media</div>
-                  </button>
-                  <button type="button" onclick="seleccionarTarjeta(this, 'grupo-prioridad')" class="grupo-prioridad flex items-center gap-3 text-left p-3.5 rounded-xl border-2 border-[#298c71] bg-[#ebf2ee] transition-all">
-                    <div class="w-2.5 h-2.5 rounded-full bg-gray-400 shrink-0"></div><div class="texto-tarjeta font-semibold text-[#1a4031] text-sm">Baja</div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-between mt-6 pt-6 border-t border-gray-100 shrink-0">
-            <button type="button" onclick="cambiarPaso(1)" class="px-6 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">Volver</button>
-            <button type="button" onclick="cambiarPaso(3)" class="px-10 py-3 rounded-lg text-sm font-bold text-white bg-[#1a4031] hover:bg-[#122e23] transition-colors shadow-lg active:scale-95">Siguiente paso</button>
-          </div>
-        </div>
-
-        <!-- PASO 3: COLABORACIÓN NUEVO -->
-        <div id="paso-3" class="wizard-step hidden flex-1 flex flex-col min-h-0">
-          <div class="mb-8 shrink-0">
-            <div class="text-[#298c71] font-bold text-xs tracking-widest uppercase mb-1">Paso 3 de 3</div>
-            <h3 class="text-3xl font-extrabold text-gray-800">¿Necesitás colaboración de otra gerencia?</h3>
-            <p class="text-gray-500 text-base mt-1">Podés mencionar una o más áreas involucradas.</p>
-          </div>
-          
-          <div class="flex-1 flex flex-col min-h-0 overflow-y-auto">
-            
-            <!-- Contenedor de Tags generados dinámicamente -->
-            <div class="flex flex-wrap gap-3 mb-8">
-              ${gerencias.map(g => `
-                <button type="button" onclick="toggleTag(this)" class="flex items-center gap-2 px-4 py-2 rounded-full border-2 border-gray-200 bg-white text-gray-600 text-sm font-medium hover:border-gray-300 transition-all select-none">
-                  <span class="tag-icon font-bold text-lg leading-none">+</span>
-                  @${g}
-                </button>
-              `).join('')}
-            </div>
-
-            <!-- Checkbox de Requiere Respuesta -->
-            <div class="flex items-start gap-3 mb-6">
-              <input type="checkbox" id="req-respuesta" class="mt-1 w-5 h-5 rounded border-gray-300 text-[#298c71] focus:ring-[#298c71] cursor-pointer">
-              <div>
-                <label for="req-respuesta" class="font-bold text-gray-800 cursor-pointer select-none">Requiere respuesta</label>
-                <p class="text-sm text-gray-500 mt-0.5">La novedad quedará marcada como pendiente hasta recibir feedback.</p>
-              </div>
-            </div>
-
-            <!-- Banner Informativo -->
-            <div class="p-4 bg-[#f4f7f5] border-l-4 border-[#298c71] rounded-r-lg flex gap-3 items-center">
-              <svg class="text-[#298c71] shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-              <p class="text-sm text-gray-600 font-medium">Las gerencias mencionadas podrán responder y realizar seguimiento desde la novedad.</p>
-            </div>
-
-          </div>
-
-          <div class="flex justify-between mt-6 pt-6 border-t border-gray-100 shrink-0">
-            <button type="button" onclick="cambiarPaso(2)" class="px-6 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
-              Volver
-            </button>
-            <button type="submit" class="px-10 py-3 rounded-lg text-sm font-bold text-white bg-[#298c71] hover:bg-[#1a4031] transition-colors shadow-lg active:scale-95">
-              Publicar Novedad
-            </button>
-          </div>
+          <button type="submit" class="px-8 py-3 rounded-lg text-sm font-bold text-white bg-[#1a4031] hover:bg-[#122e23] transition-colors shadow-md active:scale-95 flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2 11 13"></path><path d="m22 2-7 20-4-9-9-4 20-7z"></path></svg>
+            Publicar Novedades
+          </button>
         </div>
 
       </form>

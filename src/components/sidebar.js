@@ -1,14 +1,13 @@
 import { icon } from './icons.js';
 
-/**
- * COMPONENTE: Sidebar (Barra de Navegación Lateral)
- * @param {string} activeRoute - La ruta actual de la URL para pintar el botón activo.
- * @param {object} usuario - El objeto del usuario logueado para validar permisos.
- */
 export function sidebar(activeRoute = 'dashboard', usuario) {
   
-  // LOGICA DE PERMISOS: Solo el Gerente General y el Admin de IT pueden ver la Vista Gerencial.
+  // 1. VARIABLES DE PERMISOS
+  // ¿Ve la sección Administración? (GG y Sistemas)
   const puedeVerAdministracion = usuario.rol === 'gerente_general' || usuario.rol === 'admin_it';
+  
+  // ¿Es de Sistemas? (Solo para el botón de Panel IT)
+  const esAdminIT = usuario.rol === 'admin_it';
 
   return `
     <aside class="fixed left-0 top-0 z-50 w-[250px] bg-[#1a4031] text-[#dbe9e1] flex flex-col h-screen border-r border-white/10">
@@ -39,11 +38,10 @@ export function sidebar(activeRoute = 'dashboard', usuario) {
         </a>
 
         <a href="#/crear" class="flex items-center gap-3 h-11 px-3 rounded-lg text-sm font-semibold transition-colors ${activeRoute === 'crear' ? 'bg-[#265b44] text-white' : 'text-[#c7d8ce] hover:bg-white/5 hover:text-white'}">
-          ${icon('plus', 18)} Crear novedad
+          ${icon('plus', 18)} Crear Novedad
         </a>
 
-        <!-- RENDERIZADO CONDICIONAL DE PERMISOS -->
-        <!-- Si 'puedeVerAdministracion' es true, dibuja el HTML. Si es false, dibuja un texto vacío ('') -->
+        <!-- SECCIÓN ADMINISTRACIÓN (Condicional) -->
         ${puedeVerAdministracion ? `
           <div class="h-px w-full bg-white/10 my-4"></div>
           <span class="px-2 pb-2 text-[#8ea79a] text-[10px] font-bold tracking-widest uppercase">Administración</span>
@@ -51,13 +49,20 @@ export function sidebar(activeRoute = 'dashboard', usuario) {
           <a href="#/gerencial" class="flex items-center gap-3 h-11 px-3 rounded-lg text-sm font-semibold transition-colors ${activeRoute === 'gerencial' ? 'bg-[#265b44] text-white' : 'text-[#c7d8ce] hover:bg-white/5 hover:text-white'}">
             ${icon('shield', 18)} Vista Gerencial
           </a>
+
+          <!-- BOTÓN PANEL IT (Doble Condicional: Solo Sistemas lo ve) -->
+          ${esAdminIT ? `
+            <a href="#/admin" class="flex items-center gap-3 h-11 px-3 rounded-lg text-sm font-semibold transition-colors ${activeRoute === 'admin' ? 'bg-[#265b44] text-white' : 'text-[#c7d8ce] hover:bg-white/5 hover:text-white'}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              Panel IT
+            </a>
+          ` : ''}
+
         ` : ''}
       </nav>
 
       <!-- SECCIÓN DEL USUARIO DINÁMICA Y CERRAR SESIÓN -->
       <div class="flex items-center justify-between h-20 px-5 border-t border-white/10 shrink-0">
-        
-        <!-- Info del usuario -->
         <div class="flex items-center gap-3 min-w-0">
           <div class="grid place-items-center shrink-0 w-10 h-10 rounded-full bg-[#d6e8a7] text-[#1a4031] text-xs font-extrabold shadow-inner">
             ${usuario.nombre.split(' ').map(n => n[0]).join('')}
@@ -67,20 +72,9 @@ export function sidebar(activeRoute = 'dashboard', usuario) {
             <strong class="text-white text-sm truncate leading-none">${usuario.nombre}</strong>
           </div>
         </div>
-
-        <!-- Botón de Encendido / Cerrar Sesión -->
-        <button 
-          id="btn-logout" 
-          class="text-[#298c71] hover:text-[#d4e6a1] transition-all duration-200 p-2.5 rounded-full hover:bg-white/10 active:scale-90 shadow-sm" 
-          title="Cerrar sesión"
-        >
-          <!-- Ícono de Power (Consola) -->
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-            <line x1="12" y1="2" x2="12" y2="12"></line>
-          </svg>
+        <button id="btn-logout" class="text-[#298c71] hover:text-[#d4e6a1] transition-all duration-200 p-2.5 rounded-full hover:bg-white/10 active:scale-90 shadow-sm" title="Cerrar sesión">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
         </button>
-
       </div>
     </aside>
   `;

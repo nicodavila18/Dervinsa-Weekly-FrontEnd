@@ -2,14 +2,14 @@
 export const usuariosPrueba = {
   gerenteGeneral: {
     id: 1,
-    nombre: "Juan Pérez",
+    nombre: "Roberto Gómez",
     rol: "gerente_general", 
     gerencia: "Gerencia General", // Juan debería ser Gral.
     email: "gerentegeneral@gmail.com"
   },
   gerenteSsheq: { // Clave única para Pablo
     id: 2,
-    nombre: "Pablo Martín",
+    nombre: "Juan Perez",
     rol: "gerencia",
     gerencia: "SSHEQ",
     email: "ssheq@gmail.com"
@@ -23,7 +23,7 @@ export const usuariosPrueba = {
   },
   gerenteMantenimiento: {
     id: 4,
-    nombre: "Alejandro Pozzi",
+    nombre: "Manuel Belgrano",
     rol: "gerencia",
     gerencia: "Mantenimiento", // Debe ser idéntico al nombre en bancoDePreguntas
     email: "mantenimiento@gmail.com"
@@ -62,6 +62,13 @@ export const usuariosPrueba = {
     rol: "gerencia",
     gerencia: "RRHH", // Debe ser idéntico al nombre en bancoDePreguntas
     email: "rrhh@gmail.com"
+  },
+  gerenciaIT: {
+    id: 10,
+    nombre: "Lionel Messi",
+    rol: "admin_it",
+    gerencia: "Sistemas",
+    email: "it@gmail.com"
   }
 };
 
