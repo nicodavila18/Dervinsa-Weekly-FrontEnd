@@ -26,15 +26,15 @@ export function dashboardView() {
     Aquí solo mostramos novedades que requieran acción (Estancadas, Esperando feedback, etc).
   */
   const novedadesUrgentes = [
-    { id: 1, semaforo: "bg-yellow-400", titulo: "Confirmar disponibilidad de materia prima", gerencia: "Comercio Local", prioridad: { texto: "Alta", clases: "text-orange-700 border-orange-200 bg-orange-50" }, estado: { texto: "Pendiente de colaboración", clases: "text-yellow-700 border-yellow-200 bg-yellow-50" }, antiguedad: "5 días", alerta: false },
+    { id: 1, semaforo: "bg-yellow-400", titulo: "Demora en mantenimiento bomba P-204", gerencia: "Mantenimiento", prioridad: { texto: "Alta", clases: "text-orange-700 border-orange-200 bg-orange-50" }, estado: { texto: "Pendiente de colaboración", clases: "text-yellow-700 border-yellow-200 bg-yellow-50" }, antiguedad: "5 días", alerta: false },
     { id: 2, semaforo: "bg-red-500", titulo: "Pago pendiente a proveedor de transporte", gerencia: "Administración / Finanzas", prioridad: { texto: "Máxima", clases: "text-red-700 border-red-200 bg-red-50" }, estado: { texto: "En seguimiento", clases: "text-blue-700 border-blue-200 bg-blue-50" }, antiguedad: "8 días", alerta: true },
-    { id: 3, semaforo: "bg-yellow-400", titulo: "Mantenimiento preventivo bomba P-204", gerencia: "Ingeniería y Mantenimiento", prioridad: { texto: "Media", clases: "text-gray-700 border-gray-200 bg-gray-50" }, estado: { texto: "Abierta", clases: "text-[#298c71] border-[#298c71]/30 bg-[#ebf2ee]" }, antiguedad: "6 días", alerta: false }
+    { id: 4, semaforo: "bg-[#298c71]", titulo: "Nuevas normativas de seguridad patrimonial", gerencia: "SSHEQ", prioridad: { texto: "Media", clases: "text-blue-700 border-blue-200 bg-blue-50" }, estado: { texto: "Abierta", clases: "text-[#298c71] border-[#298c71]/30 bg-[#ebf2ee]" }, antiguedad: "Nueva", alerta: false }
   ];
 
   const feedbackPendiente = [
-    { id: 4, origen: "Producción", destino: "Depósito / Operaciones", tema: "Confirmación de stock de pallets", dias: 3 },
-    { id: 5, origen: "Comercio Exterior", destino: "Administración", tema: "Documentación del proveedor", dias: 1 },
-    { id: 6, origen: "IT", destino: "Administración", tema: "Aprobación de enlace redundante", dias: 4 }
+    { id: 1, origen: "Mantenimiento", destino: "Producción", tema: "Ventana de parada técnica P-204", dias: 3 },
+    { id: 2, origen: "Administración", destino: "Comercio Exterior", tema: "Comprobantes de recepción en puerto", dias: 1 },
+    { id: 6, origen: "Sistemas", destino: "Administración", tema: "Aprobación de enlace redundante", dias: 4 }
   ];
 
   // ============================================================================
