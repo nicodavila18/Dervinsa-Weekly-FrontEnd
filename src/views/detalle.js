@@ -8,7 +8,7 @@ import { headerComponent } from '../components/header.js';
 export function detalleView() {
   
   // ============================================================================
-  // 1. MOCK DATA & LÓGICA DE RUTEO INTERNO
+  // 1. MOCK DATA & LÓGICA DE RUTEO INTERNO (Sincronizado con Dashboard y Novedades)
   // ============================================================================
   
   const hashParts = window.location.hash.split('?');
@@ -31,6 +31,21 @@ export function detalleView() {
       descripcion: 'Se detectó un desgaste prematuro en los sellos de la bomba P-204 que abastece la línea principal. Necesitamos coordinar una parada de planta de 4 horas con Producción para realizar el cambio preventivo antes del fin de semana para evitar roturas mayores.',
       requiereColaboracion: true
     },
+    '2': {
+      id: '2',
+      tipo: 'Seguimiento',
+      titulo: 'Pago pendiente a proveedor de transporte',
+      ticket: '#NOV-0271',
+      fechaCreacion: '25/08/2026',
+      gerenciaOrigen: { tag: 'AF', nombre: 'Administración' },
+      gerenciaDestino: { tag: 'CX', nombre: 'Comercio Exterior' },
+      prioridad: { texto: 'Máxima', clases: 'text-red-700 bg-red-50 border-red-200' },
+      estado: { texto: 'En seguimiento', clases: 'text-blue-700 bg-blue-50 border-blue-200', esResoluble: true },
+      fechaLimite: '03/09/2026',
+      puntoTemario: { num: 62, texto: 'Pagos a realizar en la semana' },
+      descripcion: 'Tenemos retenido el pago al proveedor de fletes internacionales (Logística del Sur S.A.) porque nos faltan los comprobantes de recepción en puerto. Sin esto, Finanzas no libera la transferencia y amenazan con cortar servicio.',
+      requiereColaboracion: true
+    },
     '3': {
       id: '3',
       tipo: 'Aviso',
@@ -40,7 +55,7 @@ export function detalleView() {
       gerenciaOrigen: { tag: 'DO', nombre: 'Depósito / Operaciones' },
       gerenciaDestino: null,
       prioridad: { texto: 'Baja', clases: 'text-gray-700 bg-gray-50 border-gray-200' },
-      estado: { texto: 'En seguimiento', clases: 'text-blue-700 bg-blue-50 border-blue-200', esResoluble: true },
+      estado: { texto: 'Resuelta', clases: 'text-gray-500 bg-gray-100 border-gray-200', esResoluble: false }, // Es un aviso, no se "resuelve" de nuevo
       fechaLimite: null,
       puntoTemario: { num: 28, texto: 'Llegada de MP importadas acumulado mensual vs forecast' },
       descripcion: 'Confirmamos la recepción de 3 contenedores en aduana. Ingresarán a planta entre hoy a la tarde y mañana a primera hora. El espacio en el sector C ya fue liberado para la descarga.',
@@ -165,7 +180,6 @@ export function detalleView() {
             const nuevoEstado = document.getElementById('select-nuevo-estado').value;
             m.emitirNotificacion('Estado actualizado', `La novedad pasó a estar: ${nuevoEstado}`, '#/detalle', 'info');
           } else if (tipo === 'semaforo') {
-            // Nueva alerta para el semáforo
             m.emitirNotificacion('Semáforo actualizado', 'La prioridad ejecutiva se reflejará en el Dashboard.', '#/detalle', 'info');
           }
         });
@@ -179,6 +193,10 @@ export function detalleView() {
 
   const renderColaboracion = () => {
     if (esAviso || !novedad.requiereColaboracion) return '';
+    
+    // Solo un detalle cosmético para la demo: Si el ID es 2, fingimos que el destino respondió
+    const esperaRespuesta = novedadId !== '2'; 
+
     return `
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-6">
         <div class="flex justify-between items-center mb-6">
@@ -186,10 +204,17 @@ export function detalleView() {
             <h3 class="text-lg font-bold text-gray-800">Colaboración</h3>
             <p class="text-sm text-gray-500">Circuito de respuesta requerida.</p>
           </div>
-          <span class="px-3 py-1 rounded text-xs font-bold border text-yellow-700 bg-yellow-50 border-yellow-200 flex items-center gap-1.5">
-            <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></div>
-            Esperando respuesta
-          </span>
+          ${esperaRespuesta ? `
+            <span class="px-3 py-1 rounded text-xs font-bold border text-yellow-700 bg-yellow-50 border-yellow-200 flex items-center gap-1.5">
+              <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></div>
+              Esperando respuesta
+            </span>
+          ` : `
+            <span class="px-3 py-1 rounded text-xs font-bold border text-[#298c71] bg-[#ebf2ee] border-[#298c71]/30 flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Respondido
+            </span>
+          `}
         </div>
         
         <div class="flex items-center justify-between gap-4 max-w-3xl mx-auto bg-gray-50 p-6 rounded-lg border border-gray-100">
@@ -202,16 +227,16 @@ export function detalleView() {
           </div>
           
           <div class="flex-1 flex flex-col items-center px-4">
-            <span class="text-[10px] font-bold text-gray-400 mb-1">espera respuesta de</span>
+            <span class="text-[10px] font-bold text-gray-400 mb-1">${esperaRespuesta ? 'espera respuesta de' : 'recibió respuesta de'}</span>
             <div class="w-full h-px bg-gray-300 relative flex items-center justify-center">
-              <svg class="text-gray-400 absolute" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg>
+              <svg class="text-gray-400 absolute" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="${esperaRespuesta ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'}"/></svg>
             </div>
           </div>
 
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-700 font-extrabold flex items-center justify-center border border-blue-100 shadow-sm">${novedad.gerenciaDestino.tag}</div>
             <div>
-              <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-0.5">Debe responder</span>
+              <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-0.5">${esperaRespuesta ? 'Debe responder' : 'Respondió'}</span>
               <span class="font-bold text-gray-800 text-sm">@${novedad.gerenciaDestino.nombre}</span>
             </div>
           </div>
@@ -247,9 +272,11 @@ export function detalleView() {
     return html;
   };
 
-  // Bloque: Timeline Historial (Mockeado para ambos casos)
+  // Bloque: Timeline Historial 
   const renderTimeline = () => {
-    if (esAviso) {
+    
+    // Si es la Novedad 3 (Aviso de Contenedores)
+    if (novedadId === '3') {
       return `
         <!-- Ítem inicial (Creación del Aviso) -->
         <div class="relative flex items-start gap-5 -ml-[21px]">
@@ -267,22 +294,49 @@ export function detalleView() {
       `;
     }
 
-    // Timeline para Seguimiento
-    return `
-      <!-- Ítem más reciente (Respuesta Producción) -->
-      <div class="relative flex items-start gap-5 -ml-[21px]">
-        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 text-xs font-extrabold flex items-center justify-center border-2 border-white shadow-sm shrink-0 z-10 mt-1">PR</div>
-        <div class="flex-1">
-          <div class="flex items-center gap-2 mb-1.5">
-            <span class="text-sm font-bold text-gray-800">Producción</span>
-            <span class="text-[10px] font-extrabold text-gray-400 uppercase">29 AGO, 14:30</span>
-          </div>
-          <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg rounded-tl-none text-sm text-gray-700">
-            Entendido. Podemos hacer la ventana de mantenimiento este viernes de 14:00 a 18:00 hs. ¿Confirman si llegan con los repuestos?
+    // Si es la Novedad 2 (Pago Pendiente - Comercio Exterior ya respondió)
+    if (novedadId === '2') {
+       return `
+        <!-- Ítem más reciente (Respuesta Comercio Exterior) -->
+        <div class="relative flex items-start gap-5 -ml-[21px]">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 text-xs font-extrabold flex items-center justify-center border-2 border-white shadow-sm shrink-0 z-10 mt-1">CX</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-sm font-bold text-gray-800">Comercio Exterior</span>
+              <span class="text-[10px] font-extrabold text-gray-400 uppercase">26 AGO, 11:20</span>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg rounded-tl-none text-sm text-gray-700">
+              Disculpen la demora. El despachante acaba de enviarnos los BL originales. En un rato los subimos a la carpeta compartida de Finanzas para que puedan liberar el pago.
+            </div>
           </div>
         </div>
-      </div>
 
+        <!-- Evento de sistema -->
+        <div class="relative flex items-center gap-5 -ml-[17px]">
+          <div class="w-8 h-8 rounded bg-gray-50 text-gray-400 flex items-center justify-center border-2 border-white shrink-0 z-10">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12A10 10 0 0 0 12 2v0a10 10 0 0 0-10 10c0 4.4 2.8 8.1 6.8 9.5.8.3 1.2-.4 1.2-.8v-2.2c-2.8.6-3.4-1.4-3.4-1.4-.7-1.8-1.8-2.3-1.8-2.3-1.4-1 .1-1 .1-1 1.6.1 2.4 1.6 2.4 1.6 1.4 2.4 3.7 1.7 4.6 1.3.1-1 .6-1.7 1-2.1-3-.3-6.2-1.5-6.2-6.7 0-1.5.5-2.7 1.4-3.7-.1-.3-.6-1.7.1-3.6 0 0 1.2-.4 3.8 1.4a13.3 13.3 0 0 1 7 0c2.6-1.8 3.8-1.4 3.8-1.4.7 1.9.2 3.3.1 3.6.9 1 1.4 2.2 1.4 3.7 0 5.2-3.2 6.4-6.2 6.7.6.5 1.1 1.5 1.1 3v4.4c0 .4.4 1.1 1.2.8A10 10 0 0 0 22 12Z"/></svg>
+          </div>
+          <p class="text-xs font-bold text-gray-400">@Comercio Exterior fue notificada automáticamente por el sistema.</p>
+        </div>
+
+        <!-- Ítem inicial (Creación) -->
+        <div class="relative flex items-start gap-5 -ml-[21px]">
+          <div class="w-10 h-10 rounded-lg bg-[#f7fbf8] text-[#1a4031] text-xs font-extrabold flex items-center justify-center border-2 border-white shadow-sm shrink-0 z-10 mt-1">AF</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-sm font-bold text-gray-800">Administración</span>
+              <span class="text-[10px] font-extrabold text-gray-400 uppercase">25 AGO, 09:30</span>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg rounded-tl-none text-sm text-gray-700">
+              Tenemos retenido el pago al proveedor de fletes internacionales (Logística del Sur S.A.) porque nos faltan los comprobantes de recepción en puerto. @Comercio Exterior, por favor enviar documentación urgente.
+            </div>
+          </div>
+        </div>
+       `;
+    }
+
+    // Default: Novedad 1 (Mantenimiento pidiendo a Producción - Sin respuesta aún)
+    return `
       <!-- Evento de sistema -->
       <div class="relative flex items-center gap-5 -ml-[17px]">
         <div class="w-8 h-8 rounded bg-gray-50 text-gray-400 flex items-center justify-center border-2 border-white shrink-0 z-10">
@@ -480,7 +534,6 @@ export function detalleView() {
                 <p class="text-[11px] text-gray-500 mb-4 leading-relaxed">Sobrescribir la prioridad operativa con un semáforo personalizado.</p>
                 
                 <button onclick="abrirModalDetalle('semaforo')" class="w-full py-2.5 px-4 rounded-md border border-gray-200 text-sm font-bold text-gray-600 hover:border-[#0a2319] hover:text-[#0a2319] hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors shadow-sm">
-                  <!-- Ícono de ajuste / semáforo -->
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="8" r="2"></circle><circle cx="12" cy="16" r="2"></circle></svg>
                   Definir Semáforo
                 </button>
@@ -489,37 +542,6 @@ export function detalleView() {
             
           </div>
         </div>
-      </div>
-    </div>
-    <!-- ========================================== -->
-    <!-- MODAL DINÁMICO DE DETALLES                 -->
-    <!-- ========================================== -->
-    <div id="detalle-modal-overlay" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-[#0a2319]/40 backdrop-blur-sm transition-opacity opacity-0">
-      <div id="detalle-modal-container" class="bg-white w-full max-w-md mx-4 rounded-lg shadow-2xl border-t-4 border-[#298c71] transform scale-95 transition-transform duration-300">
-        
-        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
-          <div>
-            <h3 id="modal-detalle-titulo" class="text-lg font-extrabold text-[#0a2319]">Título</h3>
-            <p id="modal-detalle-subtitulo" class="text-xs text-gray-500 mt-0.5">Subtítulo</p>
-          </div>
-          <button type="button" onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-
-        <form id="form-detalle-modal" class="flex flex-col">
-          <div id="modal-detalle-contenido" class="px-6 py-5 space-y-4">
-             <!-- Contenido inyectado por JS -->
-          </div>
-          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 rounded-b-lg">
-            <button type="button" onclick="cerrarModalDetalle()" class="px-4 py-2 rounded-md text-sm font-bold text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm">
-              Cancelar
-            </button>
-            <button type="submit" class="px-5 py-2 rounded-md text-sm font-bold text-white bg-[#1a4031] hover:bg-[#122e23] transition-colors shadow-sm flex items-center gap-2 active:scale-95">
-              <span id="modal-detalle-btn-submit">Guardar</span>
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   `;
