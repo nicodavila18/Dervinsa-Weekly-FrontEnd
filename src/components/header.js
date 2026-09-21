@@ -35,12 +35,15 @@ export function headerComponent(vistaActual, breadcrumbs = []) {
         <span class="font-bold text-gray-800 text-base sm:text-sm">${vistaActual}</span>
       </div>
       
-      <div class="flex items-center gap-4 relative">
-        <span class="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded text-xs font-bold flex items-center gap-1.5">
+      <!-- PARTE DERECHA: Etiqueta y Campanita -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        
+        <!-- Etiqueta Prototipo (Oculta en celulares muy chicos para ahorrar espacio) -->
+        <span class="hidden sm:flex px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded text-xs font-bold items-center gap-1.5">
           <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Prototipo
         </span>
         
-        <!-- CONTENEDOR DE LA CAMPANITA Y EL DROPDOWN -->
+        <!-- CONTENEDOR DE LA CAMPANITA -->
         <div class="relative">
           
           <!-- BOTÓN CAMPANITA -->
@@ -53,8 +56,9 @@ export function headerComponent(vistaActual, breadcrumbs = []) {
              ` : ''}
           </button>
 
-          <!-- EL MODAL / DROPDOWN (Oculto por defecto) -->
-          <div id="dropdown-notificaciones" class="hidden absolute top-10 right-0 w-80 bg-white border border-gray-200 shadow-xl rounded-lg overflow-hidden z-[70] flex flex-col cursor-default origin-top-right" onclick="event.stopPropagation()">
+          <!-- EL MODAL / DROPDOWN RESPONSIVO -->
+          <!-- Cambiamos las clases de posicionamiento para que en móvil sea 'fixed' y en desktop 'absolute' -->
+          <div id="dropdown-notificaciones" class="hidden fixed sm:absolute top-16 sm:top-10 left-4 right-4 sm:left-auto sm:right-0 w-auto sm:w-80 bg-white border border-gray-200 shadow-xl rounded-lg overflow-hidden z-[70] flex-col cursor-default sm:origin-top-right" onclick="event.stopPropagation()">
             
             <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex justify-between items-center">
                <span class="text-[10px] font-extrabold text-gray-700 uppercase tracking-widest">Notificaciones</span>

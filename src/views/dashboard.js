@@ -80,20 +80,24 @@ export function dashboardView() {
           
           <!-- TABLA: REQUIEREN ATENCIÓN -->
           <div class="lg:col-span-2 flex flex-col">
-            <div class="flex justify-between items-end mb-4 px-1">
+            
+            <!-- ACÁ ESTÁ EL TÍTULO QUE SE HABÍA PERDIDO -->
+            <div class="flex flex-row justify-between items-end mb-4 px-1 gap-2">
               <div>
-                <h3 class="text-lg font-bold text-gray-800">Requieren atención</h3>
-                <p class="text-sm text-gray-500">Temas críticos, próximos a vencer o sin avances.</p>
+                <h3 class="text-lg font-bold text-gray-800 leading-tight">Requieren atención</h3>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">Temas críticos o sin avances.</p>
               </div>
-              <!-- Ver Todas las urgentes (Filtra descartando las resueltas o nuevas) -->
-              <a href="#/novedades" class="text-sm font-bold text-[#298c71] hover:text-[#1a4031] flex items-center gap-1 transition-colors">
+              <a href="#/novedades" class="text-sm font-bold text-[#298c71] hover:text-[#1a4031] flex items-center gap-1 transition-colors shrink-0 pb-0.5">
                 Ver todas <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
               </a>
             </div>
             
             <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm flex-1">
-              <table class="w-full text-left border-collapse">
-                <thead>
+              <!-- Le decimos a la tabla que se comporte como un bloque en móvil, y como tabla en lg: -->
+              <table class="w-full text-left border-collapse block lg:table">
+                
+                <!-- Ocultamos los encabezados en celular -->
+                <thead class="hidden lg:table-header-group">
                   <tr class="bg-gray-50 border-b border-gray-200">
                     <th class="py-3 px-5 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest w-[40%]">Novedad</th>
                     <th class="py-3 px-5 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Gerencia</th>
@@ -102,21 +106,46 @@ export function dashboardView() {
                     <th class="py-3 px-5 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest text-right">Antigüedad</th>
                   </tr>
                 </thead>
-                <tbody>
+
+                <tbody class="block lg:table-row-group">
                   ${novedadesUrgentes.map(nov => `
-                    <tr onclick="window.location.hash='#/detalle?id=${nov.id}'" class="border-b border-gray-100 hover:bg-[#fbfcfb] transition-colors cursor-pointer group">
-                      <td class="py-3.5 px-5">
+                    <!-- Convertimos el tr en un bloque apilable en móvil -->
+                    <tr onclick="window.location.hash='#/detalle?id=${nov.id}'" class="block lg:table-row border-b border-gray-100 hover:bg-[#fbfcfb] transition-colors cursor-pointer group p-4 lg:p-0">
+                      
+                      <!-- Columna 1: Título -->
+                      <td class="block lg:table-cell py-1 lg:py-3.5 px-0 lg:px-5 mb-3 lg:mb-0">
                         <div class="flex items-start gap-3">
-                          <div class="w-2 h-2 rounded-full ${nov.semaforo} mt-2 shrink-0 shadow-sm border border-black/5"></div>
+                          <div class="w-2 h-2 rounded-full ${nov.semaforo} mt-1.5 shrink-0 shadow-sm border border-black/5"></div>
                           <div>
                             <div class="font-bold text-[#0a2319] text-sm group-hover:text-[#298c71] transition-colors leading-snug">${nov.titulo}</div>
                           </div>
                         </div>
                       </td>
-                      <td class="py-3.5 px-5 text-sm text-gray-700 font-medium">${nov.gerencia}</td>
-                      <td class="py-3.5 px-5 text-center"><span class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold border ${nov.prioridad.clases}">${nov.prioridad.texto}</span></td>
-                      <td class="py-3.5 px-5 text-center"><span class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold border ${nov.estado.clases}">${nov.estado.texto}</span></td>
-                      <td class="py-3.5 px-5 text-right font-bold ${nov.alerta ? 'text-red-500' : 'text-gray-500'} text-sm">${nov.antiguedad}</td>
+                      
+                      <!-- Columna 2: Gerencia -->
+                      <td class="flex justify-between items-center lg:table-cell py-1.5 lg:py-3.5 px-0 lg:px-5 text-sm text-gray-700 font-medium border-t border-gray-50 lg:border-none mt-2 lg:mt-0 pt-2 lg:pt-0">
+                        <span class="lg:hidden text-[10px] font-bold text-gray-400 uppercase">Gerencia</span>
+                        <span>${nov.gerencia}</span>
+                      </td>
+                      
+                      <!-- Columna 3: Prioridad -->
+                      <td class="flex justify-between items-center lg:table-cell py-1.5 lg:py-3.5 px-0 lg:px-5 text-center">
+                        <span class="lg:hidden text-[10px] font-bold text-gray-400 uppercase">Prioridad</span>
+                        <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold border ${nov.prioridad.clases}">${nov.prioridad.texto}</span>
+                      </td>
+                      
+                      <!-- Columna 4: Estado -->
+                      <td class="flex justify-between items-center lg:table-cell py-1.5 lg:py-3.5 px-0 lg:px-5 text-center">
+                        <span class="lg:hidden text-[10px] font-bold text-gray-400 uppercase">Estado</span>
+                        <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold border ${nov.estado.clases}">${nov.estado.texto}</span>
+                      </td>
+                      
+                      <!-- Columna 5: Antigüedad -->
+                      <td class="flex justify-between items-center lg:table-cell py-1.5 lg:py-3.5 px-0 lg:px-5 text-right font-bold ${nov.alerta ? 'text-red-500' : 'text-gray-500'} text-sm">
+                        <span class="lg:hidden text-[10px] font-bold text-gray-400 uppercase">Antigüedad</span>
+                        <span>${nov.antiguedad}</span>
+                      </td>
+                      
                     </tr>
                   `).join('')}
                 </tbody>
