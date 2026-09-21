@@ -10,7 +10,7 @@ export function sidebar(activeRoute = 'dashboard', usuario) {
   const esAdminIT = usuario.rol === 'admin_it';
 
   return `
-    <aside id="main-sidebar" class="fixed left-0 top-0 z-[60] w-[250px] bg-[#1a4031] text-[#dbe9e1] flex flex-col h-screen border-r border-white/10 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+    <aside id="main-sidebar" class="fixed left-0 top-0 z-[60] w-[250px] bg-[#1a4031] text-[#dbe9e1] flex flex-col h-[100dvh] border-r border-white/10 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
       
       <!-- Contenedor del logo con justify-between para acomodar la X -->
       <div class="flex items-center justify-between h-20 px-4 border-b border-white/10 shrink-0">
