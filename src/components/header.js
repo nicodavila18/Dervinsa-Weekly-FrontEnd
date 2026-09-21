@@ -19,11 +19,20 @@ export function headerComponent(vistaActual, breadcrumbs = []) {
   `).join('');
 
   return `
-    <div class="bg-white border-b border-gray-200 px-10 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm shrink-0">
+    <div class="bg-white border-b border-gray-200 px-4 lg:px-10 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm shrink-0">
       
-      <div class="flex items-center gap-2 text-sm text-gray-500">
-        ${linksHtml}
-        <span class="font-bold text-gray-800">${vistaActual}</span>
+      <div class="flex items-center gap-2 sm:gap-3 text-sm text-gray-500">
+        
+        <!-- BOTÓN HAMBURGUESA (Oculto en lg:) -->
+        <button onclick="document.getElementById('main-sidebar').classList.toggle('-translate-x-full')" class="lg:hidden p-1.5 -ml-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+
+        <!-- BREADCRUMBS Y TÍTULO -->
+        <div class="hidden sm:flex items-center gap-2">
+          ${linksHtml}
+        </div>
+        <span class="font-bold text-gray-800 text-base sm:text-sm">${vistaActual}</span>
       </div>
       
       <div class="flex items-center gap-4 relative">

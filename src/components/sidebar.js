@@ -10,16 +10,27 @@ export function sidebar(activeRoute = 'dashboard', usuario) {
   const esAdminIT = usuario.rol === 'admin_it';
 
   return `
-    <aside class="fixed left-0 top-0 z-50 w-[250px] bg-[#1a4031] text-[#dbe9e1] flex flex-col h-screen border-r border-white/10">
+    <aside id="main-sidebar" class="fixed left-0 top-0 z-[60] w-[250px] bg-[#1a4031] text-[#dbe9e1] flex flex-col h-screen border-r border-white/10 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
       
-      <div class="flex items-center gap-3 h-20 px-6 border-b border-white/10">
-        <div class="flex items-center justify-center w-10 h-10 bg-white rounded-full p-1 shrink-0">
-           <img src="/logo-redondo.png" alt="Dervinsa" class="w-full h-full object-contain" />
+      <!-- Contenedor del logo con justify-between para acomodar la X -->
+      <div class="flex items-center justify-between h-20 px-4 border-b border-white/10 shrink-0">
+        
+        <!-- Logo y Texto -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-10 h-10 bg-white rounded-full p-1 shrink-0">
+             <img src="/logo-redondo.png" alt="Dervinsa" class="w-full h-full object-contain" />
+          </div>
+          <div class="flex flex-col">
+            <span class="text-white font-extrabold text-lg tracking-wide leading-none">DERVINSA</span>
+            <span class="text-green-300 text-[9px] font-bold tracking-widest uppercase mt-1">Sistema Weekly</span>
+          </div>
         </div>
-        <div class="flex flex-col">
-          <span class="text-white font-extrabold text-lg tracking-wide leading-none">DERVINSA</span>
-          <span class="text-green-300 text-[9px] font-bold tracking-widest uppercase mt-1">Sistema Weekly</span>
-        </div>
+
+        <!-- Botón Cerrar (X) - Solo visible en móvil -->
+        <button onclick="document.getElementById('main-sidebar').classList.add('-translate-x-full')" class="lg:hidden p-2 text-[#8ea79a] hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
       </div>
 
       <nav class="flex-1 py-6 px-4 flex flex-col gap-1 overflow-y-auto">
